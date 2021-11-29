@@ -4,13 +4,14 @@ import random
 from sklearn.datasets import make_blobs
 
 class Genetic:
-    def __init__(self, popSize, k, data, maxIter = 50):
+    def __init__(self, popSize, k, data, threshold = 0.9, maxIter = 200):
         self.populationSize = popSize
         self.k = k
         self.population = self.initPopulation(data)
         self.dimension = len(data[0])
         self.fitnesses = [0 for i in range(self.populationSize)]
         self.maxIterations = maxIter
+        self.threshold = threshold
     
     # для каждой особи нужно пересчитать центры(изменить хромосомы)
     def calculateClustersCenters(self, data):
@@ -30,9 +31,10 @@ class Genetic:
             
             self.fitnesses[index] = 1.0 / clusteringMetric
 
-            
+    # евклидово расстояние
     def euclideanDist(self, x, y):
         return np.sqrt(sum([pow(x[i]-y[i],2) for i in range(len(x))]))
+
     # генерируем начальную популяцию из векторов с длиной равной количеству кластеров k
     def initPopulation(self, data):
         res = []
@@ -41,14 +43,30 @@ class Genetic:
             res.append(tmp)
         return res
 
+    # одноточечная мутация
+    def mutation(self, agent):
+        idx = random.randint(0, self.k-1)
+        delta = random.random()
+        flag = True if random.random() > 0.5 else False
+        if flag:
+            for j in range(self.dimension):
+                agent[idx][j] = agent[idx][j] + agent[idx][j] * delta
+        else:
+            for j in range(self.dimension):
+                agent[idx][j] = agent[idx][j] - agent[idx][j] * delta
+
+
+    # Одноточечное скрещивание
     def onePointCross(self, indexOfAgentForCross):
         newPopulation = list()
         agentForCross = [self.population[i] for i in indexOfAgentForCross]
         chromosomeSize = self.k * self.dimension
         delimeter = random.randint(1, chromosomeSize - 2)
+
         for i in range(int(self.populationSize / 2)):
             firstParentIndex = random.randint(0, len(agentForCross)-1)
             secondParentIndex = random.randint(0, len(agentForCross)-1)
+
             while (firstParentIndex == secondParentIndex):
                 firstParentIndex = random.randint(0, len(agentForCross) - 1)
                 secondParentIndex = random.randint(0, len(agentForCross) - 1)
@@ -64,8 +82,6 @@ class Genetic:
         return newPopulation
 
         
-
-
     # рулеточный отбор особей для скрещивания (функция возваращает набор индексов особей для скрещивания)
     def proportionalSelection(self):
         bestAgents = list()
@@ -82,18 +98,27 @@ class Genetic:
                     bestAgents.append(index)
         return bestAgents
 
+    # процесс поиска
     def run(self, data):
         for i in range(self.maxIterations):
             self.calculateClustersCenters(data)
             agentForCross = self.proportionalSelection()
             newPopulation = self.onePointCross(agentForCross)
+            for agent in newPopulation:
+                flag = True if random.random() > self.threshold else False
+                if flag:
+                    self.mutation(agent)
             self.population = newPopulation
         best = self.getBestAgent()  
         return best, self.getClusters(best, data)
+        
 
+    # лучшая особь
     def getBestAgent(self):
         bestAgentIndex = self.fitnesses.index(max(self.fitnesses))
         return self.population[bestAgentIndex]
+
+    # Присвоение точек ближайшим кластерам
     def getClusters(self, best, data):
         clusters = dict()
         for j in range(self.k):
@@ -112,21 +137,22 @@ def main():
     n_components = 5 # начальное количество кластеров
 
     # генерируем кластеры
-    X, y_true = make_blobs(n_samples=n_samples, centers=n_components, cluster_std=0.75, random_state=0)
+    X, y_true = make_blobs(n_samples=n_samples, centers=n_components, cluster_std=0.95, random_state=0)
     X = X[:, ::-1]
     plt.figure(1)
-    colors = ["m", 'blue', 'red', 'yellow', 'orange', 'purple']
-    gen = Genetic(20, n_components, X)
+    colors = ["#fcc500", '#00fc89', '#ff68ed', '#ff713a', '#48aeff', '#c5ff1c']
+    gen = Genetic(30, n_components, X)
+
     best, clusters = gen.run(X)
+    
    
-
-
     for centroid in clusters:
         color = colors[centroid]
         for point in clusters[centroid]:
-            plt.scatter(point[0], point[1], color=color, s=30)
+            plt.scatter(point[0], point[1], c=color, s=30)
     for centroid in best:
         plt.scatter(centroid[0], centroid[1], color="green", s = 300, marker = "x")
+
     
     
     plt.title("Genetic")

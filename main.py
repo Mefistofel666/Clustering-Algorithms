@@ -43,8 +43,22 @@ def getClusters(membershipMatrix):
 # print(getClusters(membershipMatrix))
 # print(membershipMatrix)
 
-X = [[1,3], [2,5], [4,8], [7,9]]
-y = sum(X,[])
-print(y)
 
 
+
+n_samples = 300 # размер обучающей выборки
+n_components = 5 # начальное количество кластеров
+
+# генерируем кластеры
+X, y_true = make_blobs(n_samples=n_samples, centers=n_components, cluster_std=0.75, random_state=0)
+X = X[:, ::-1]
+plt.figure(1)
+colors = ["#fcc500", '#00fc89', '#ff68ed', '#ff713a', '#48aeff', '#c5ff1c']
+for i in range(len(X)):
+        color = colors[y_true[i]]
+        plt.scatter(X[i][0], X[i][1], c=color, s=30)
+
+plt.title("Base")
+plt.xticks([])
+plt.yticks([])
+plt.show()

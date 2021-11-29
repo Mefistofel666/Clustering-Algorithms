@@ -7,7 +7,7 @@ import math
 from sklearn.datasets import make_blobs
 
 class CMEANS:
-    def __init__(self, k, n_points, m = 2, max_iterations = 1500):
+    def __init__(self, k, n_points, m = 2, max_iterations = 1000):
         self.k = k
         self.m = m # fuzzy-parameter
         self.n_points = n_points
@@ -68,14 +68,14 @@ class CMEANS:
         
             
 def main():
-    n_samples = 400 # размер обучающей выборки
+    n_samples = 300 # размер обучающей выборки
     n_components = 5 # начальное количество кластеров
 
     # генерируем кластеры
     X, y_true = make_blobs(n_samples=n_samples, centers=n_components, cluster_std=0.95, random_state=0)
     X = X[:, ::-1]
     plt.figure(1)
-    colors = ["m", 'blue', 'red', 'yellow', 'orange']
+    colors = ["#fcc500", '#00fc89', '#ff68ed', '#ff713a', '#48aeff', '#c5ff1c']
 
     cmeans = CMEANS(n_components, n_samples)
     cmeans.fit(X)
@@ -84,7 +84,7 @@ def main():
         plt.scatter(X[index][0], X[index][1], color = color,s = 30)
 
     for centroid in cmeans.centerClusters:
-	    plt.scatter(centroid[0], centroid[1], color='green', s = 300, marker = "x")
+	    plt.scatter(centroid[0], centroid[1], color='#0600ed', s = 300, marker = "x")
 
     plt.title("C-Means")
     plt.xticks([])

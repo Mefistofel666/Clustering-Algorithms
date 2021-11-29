@@ -5,7 +5,7 @@ import random
 from sklearn.datasets import make_blobs
 
 class KMEANS:
-    def __init__(self, k = 3, max_iterations = 1500):
+    def __init__(self, k = 5, max_iterations = 1000):
         self.k = k
         self.max_iterations = max_iterations
 
@@ -40,14 +40,14 @@ class KMEANS:
         return classsification
             
 def main():
-    n_samples = 500 # размер обучающей выборки
-    n_components = 3 # начальное количество кластеров
+    n_samples = 300 # размер обучающей выборки
+    n_components = 5 # начальное количество кластеров
 
     # генерируем кластеры
-    X, y_true = make_blobs(n_samples=n_samples, centers=n_components, cluster_std=0.75, random_state=0)
+    X, y_true = make_blobs(n_samples=n_samples, centers=n_components, cluster_std=0.95, random_state=0)
     X = X[:, ::-1]
     plt.figure(1)
-    colors = ["m", 'blue', 'red', 'green']
+    colors = ["#fcc500", '#00fc89', '#ff68ed', '#ff713a', '#48aeff', '#c5ff1c']
 
     kmeans = KMEANS(n_components)
     kmeans.fit(X)
@@ -57,7 +57,7 @@ def main():
 		    plt.scatter(features[0], features[1], color = color,s = 30)
 	
     for centroid in kmeans.centroids:
-	    plt.scatter(kmeans.centroids[centroid][0], kmeans.centroids[centroid][1], color='green', s = 130, marker = "x")
+	    plt.scatter(kmeans.centroids[centroid][0], kmeans.centroids[centroid][1], color='#0600ed', s = 300, marker = "x")
 
     plt.title("K-Means")
     plt.xticks([])
