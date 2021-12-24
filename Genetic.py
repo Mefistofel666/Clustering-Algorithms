@@ -1,10 +1,9 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import random
-from sklearn.datasets import make_blobs
+import src
 
 class Genetic:
-    def __init__(self, popSize, k, data, threshold = 0.9, maxIter = 200):
+    def __init__(self, popSize, k, data, threshold = 0.9, maxIter = 70):
         self.populationSize = popSize
         self.k = k
         self.population = self.initPopulation(data)
@@ -15,7 +14,7 @@ class Genetic:
     
     # для каждой особи нужно пересчитать центры(изменить хромосомы)
     def calculateClustersCenters(self, data):
-        for index,agent in enumerate(self.population):
+        for index, agent in enumerate(self.population):
             clusters = dict()
             for j in range(self.k):
                 clusters[j] = []
@@ -54,7 +53,6 @@ class Genetic:
         else:
             for j in range(self.dimension):
                 agent[idx][j] = agent[idx][j] - agent[idx][j] * delta
-
 
     # Одноточечное скрещивание
     def onePointCross(self, indexOfAgentForCross):
@@ -110,8 +108,7 @@ class Genetic:
                     self.mutation(agent)
             self.population = newPopulation
         best = self.getBestAgent()  
-        return best, self.getClusters(best, data)
-        
+        return np.array(best), self.getClusters(best, data)
 
     # лучшая особь
     def getBestAgent(self):
@@ -132,34 +129,20 @@ class Genetic:
         return clusters
 
 
+    def predict(self, point, centroids):
+        distances = [np.linalg.norm(point - centroid) for centroid in centroids]
+        classsification = distances.index(min(distances))
+        return classsification
+
+
 def main():
-    n_samples = 300 # размер обучающей выборки
-    n_components = 5 # начальное количество кластеров
-
-    # генерируем кластеры
-    X, y_true = make_blobs(n_samples=n_samples, centers=n_components, cluster_std=0.95, random_state=0)
-    X = X[:, ::-1]
-    plt.figure(1)
-    colors = ["#fcc500", '#00fc89', '#ff68ed', '#ff713a', '#48aeff', '#c5ff1c']
-    gen = Genetic(30, n_components, X)
-
-    best, clusters = gen.run(X)
-    
-   
-    for centroid in clusters:
-        color = colors[centroid]
-        for point in clusters[centroid]:
-            plt.scatter(point[0], point[1], c=color, s=30)
-    for centroid in best:
-        plt.scatter(centroid[0], centroid[1], color="green", s = 300, marker = "x")
-
-    
-    
-    plt.title("Genetic")
-    plt.xticks([])
-    plt.yticks([])
-    plt.show()
-
+    data = src.X1
+    xlabel, ylabel, title = 'Income', 'Score', 'KMeans'
+    gen = Genetic(120, 5, data)
+    centroids, clusters = gen.run(data)
+    labels = [gen.predict(point, centroids) for point in data]
+    src.plotClusters(data, labels, centroids, '2d', xlabel, ylabel, title)
+    src.metrics(data, centroids, labels)
 
 
 if __name__ == "__main__":

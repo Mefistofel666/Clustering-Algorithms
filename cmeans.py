@@ -1,10 +1,6 @@
-from math import dist
 import numpy as np
-import matplotlib.pyplot as plt
 import random
-import operator
-import math
-from sklearn.datasets import make_blobs
+import src
 
 class CMEANS:
     def __init__(self, k, n_points, m = 2, max_iterations = 1000):
@@ -24,6 +20,7 @@ class CMEANS:
             tmpList = [x / summation for x in randList]
             self.membershipMatrix.append(tmpList)
         self.membershipMatrix = np.array(self.membershipMatrix)
+
     # вычисление центров кластеров
     def calcClusterCenter(self, X):
         self.centerClusters = list()
@@ -35,6 +32,7 @@ class CMEANS:
     
     def euclideanDist(self,x,y):
         return np.sqrt(sum([pow(x[i]-y[i],2) for i in range(len(x))]))
+
     # обновление матрицы принадлежностей
     def updateMembershipValue(self,  X):
         # надо посчитать расстояния от точек до центроидов
@@ -62,35 +60,18 @@ class CMEANS:
             curr += 1
         self.cluster_labels = self.getClusters()
 
-    def predict(self, data):
-        pass
 
-        
-            
+
 def main():
-    n_samples = 300 # размер обучающей выборки
-    n_components = 5 # начальное количество кластеров
+    data = src.X1
+    xlabel, ylabel, title = 'Income', 'Score', 'KMeans'
+    cmeans = CMEANS(5, len(data))
+    cmeans.fit(data)
+    labels = cmeans.cluster_labels
+    centroids = cmeans.centerClusters
+    src.plotClusters(data, labels, centroids, '2d', xlabel, ylabel, title)
+    src.metrics(data, centroids, labels)
 
-    # генерируем кластеры
-    X, y_true = make_blobs(n_samples=n_samples, centers=n_components, cluster_std=0.95, random_state=0)
-    X = X[:, ::-1]
-    plt.figure(1)
-    colors = ["#fcc500", '#00fc89', '#ff68ed', '#ff713a', '#48aeff', '#c5ff1c']
-
-    cmeans = CMEANS(n_components, n_samples)
-    cmeans.fit(X)
-    for index, cluster in enumerate(cmeans.cluster_labels):
-        color = colors[cluster]
-        plt.scatter(X[index][0], X[index][1], color = color,s = 30)
-
-    for centroid in cmeans.centerClusters:
-	    plt.scatter(centroid[0], centroid[1], color='#0600ed', s = 300, marker = "x")
-
-    plt.title("C-Means")
-    plt.xticks([])
-    plt.yticks([])
-    plt.show()
-    
    
 if __name__ == "__main__":
     main()
